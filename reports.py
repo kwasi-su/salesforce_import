@@ -5,35 +5,43 @@ import requests
 import psycopg2
 
 
-def make_csv_report(domain, report_id, csv_filename):
+def make_csv_report(sub_domain, report_id, csv_filename):
+    """
+
+    :param sub_domain: the first part of your salesforce report url. Comes after the https:// and before the salesforce.com
+    :param report_id:
+    :param csv_filename:
+    :return:
+    """
     sf = Salesforce(username=os.environ.get("SF_USERNAME"),
                     password=os.environ.get("SF_PASSWORD"),
                     security_token=os.environ.get("SF_TOKEN"),
                     )
 
-    url = "https://" + domain + ".salesforce.com/" + report_id + "?view=d&snip&export=1&enc=UTF-8&xf=csv"
+    url = "https://" + sub_domain + ".salesforce.com/" + report_id + "?view=d&snip&export=1&enc=UTF-8&xf=csv"
 
     response = requests.get(url, headers=sf.headers, cookies={'sid': sf.session_id})
 
     decoded_content = response.content.decode('utf-8')
     data = list(csv.reader(decoded_content.splitlines(), delimiter=','))
     print("records downloaded: ", len(data))
+    csv_path = "csv/" + csv_filename
 
     try:
         # check if file exists, if so, delete it and make a new file
-        writer = csv.writer(open(csv_filename, "r"))
+        writer = csv.writer(open(csv_path, "r"))
         if writer:
-            os.remove(csv_filename)
+            os.remove(csv_path)
             print(csv_filename, " removed!")
-        write_csv_file(csv_filename, data)
+        write_csv_file(csv_path, data)
 
     except IOError:
-        write_csv_file(csv_filename, data)
+        write_csv_file(csv_path, data)
 
 
 
-def write_csv_file(filename, data):
-    with open(filename, "w") as f:
+def write_csv_file(filepath, data):
+    with open(filepath, "w") as f:
         writer = csv.writer(f)
         for row in data:
             if len(str(row)) > 3:
@@ -41,6 +49,8 @@ def write_csv_file(filename, data):
             else:
                 print("reached end of report")
                 break
+
+        filename = filepath.replace("csv/", "")
         print(filename, "created!")
 
 
@@ -50,6 +60,11 @@ def import_csv_data_into_database(db_name, user, host='localhost', port='5432'):
 
     connection = pyscopg2.connect(database_params)
 
+    # rest of the method coming soon
+
+
+
+# Call your methods here. I have included sample calls
 make_csv_report('na42', '00OF0000006tIhr', 'KA_SFExport_SUEvents_Attendees_Contact_20170213')
 make_csv_report('na42', '00OF0000006tIhh', 'KA_SFExport_Speakers_Contacts_20170213')
 make_csv_report('na42', '00OF0000006tIhX', 'KA_SFExport_SUEvents_20170130')
