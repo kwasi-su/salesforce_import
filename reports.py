@@ -8,10 +8,10 @@ import psycopg2
 def make_csv_report(sub_domain, report_id, csv_filename):
     """
 
-    :param sub_domain: the first part of your salesforce report url. Comes after the https:// and before the salesforce.com
-    :param report_id:
-    :param csv_filename:
-    :return:
+    :param {String} sub_domain: The first part of your salesforce report url. Comes after the https:// and before the salesforce.com
+    :param {String} report_id: The number after the domain e.g in https://na42.salesforce.com/00OF0000006hyFi, report id is '00OF0000006hyFi'
+    :param {String} csv_filename: What you want to name the file
+    :return: None
     """
     sf = Salesforce(username=os.environ.get("SF_USERNAME"),
                     password=os.environ.get("SF_PASSWORD"),
@@ -41,6 +41,12 @@ def make_csv_report(sub_domain, report_id, csv_filename):
 
 
 def write_csv_file(filepath, data):
+    """
+
+    :param {String} filepath: Path for your csv file
+    :param {String} data: decoded csv data
+    :return:  None
+    """
     with open(filepath, "w") as f:
         writer = csv.writer(f)
         for row in data:
@@ -55,6 +61,14 @@ def write_csv_file(filepath, data):
 
 
 def import_csv_data_into_database(db_name, user, host='localhost', port='5432'):
+    """
+
+    :param {String} db_name: Name of database
+    :param {String} user: Name of database user
+    :param {String} host: Name of database host
+    :param {String} port: Name of database port
+    :return: None
+    """
 
     database_params = "host={0} port={1} db_name={2} user={3}".format(host, port, db_name, user)
 
